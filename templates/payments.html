@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Список платежей</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.6rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>💳 Список платежей</h1>
+  {% if payments %}
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Session ID</th>
+        <th>Email</th>
+        <th>Сумма</th>
+        <th>Валюта</th>
+        <th>Дата</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payments %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.session_id }}</td>
+        <td>{{ p.customer_email }}</td>
+        <td>${{ "%.2f"|format(p.amount / 100) }}</td>
+        <td>{{ p.currency.upper() }}</td>
+        <td>{{ p.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p>Платежей пока нет.</p>
+  {% endif %}
+</body>
+</html>

@@ -96,3 +96,27 @@ async def success(request: Request):
 @app.get("/cancel", response_class=HTMLResponse)
 async def cancel(request: Request):
     return templates.TemplateResponse("cancel.html", {"request": request})
+
+@app.get("/payments")
+async def get_payments():
+    query = payments.select().order_by(payments.c.created_at.desc())
+    result = await database.fetch_all(query)
+
+    # Преобразуем для удобства
+    return [
+        {
+            "id": row["id"],
+            "session_id": row["session_id"],
+            "email": row["customer_email"],
+            "amount_usd": f"${row['amount'] / 100:.2f}",
+            "currency": row["currency"].upper(),
+            "created_at": row["created_at"].isoformat()
+        }
+        for row in result
+    ]
+
+@app.get("/payments_html", response_class=HTMLResponse)
+async def get_payments_html(request: Request):
+    query = payments.select().order_by(payments.c.created_at.desc())
+    result = await database.fetch_all(query)
+    return templates.TemplateResponse("payments.html", {"request": request, "payments": result})
