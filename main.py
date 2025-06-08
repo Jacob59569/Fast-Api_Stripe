@@ -1,18 +1,26 @@
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
 import stripe
-from dotenv import load_dotenv
 import os
-import json
+from dotenv import load_dotenv
+from database import database, payments  # импорт из database.py
+import datetime
+from email_utils import send_payment_email
 
 load_dotenv()  # Загружаем переменные из .env
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 app = FastAPI()
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 @app.post("/create-checkout-session")
 async def create_checkout_session():
@@ -52,9 +60,23 @@ async def stripe_webhook(request: Request):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        print("💰 Payment successful!")
-        print("Customer email:", session["customer_details"]["email"])
-        print("ID сессии:", session["id"])
+        query = payments.insert().values(
+            session_id=session["id"],
+            customer_email=session["customer_details"]["email"],
+            amount=session["amount_total"],
+            currency=session["currency"],
+            created_at=datetime.datetime.utcnow()
+        )
+        await database.execute(query)
+        print("✅ Платёж сохранён в базу")
+
+        # send_payment_email(
+        #     to_email=session["customer_details"]["email"],
+        #     amount=session["amount_total"],
+        #     currency=session["currency"]
+        # )
+
+        print("📧 Email отправлен клиенту")
 
     return {"status": "success"}
 
