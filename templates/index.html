@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Купить кружку</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    .price {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #6772e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #5469d4;
+    }
+
+    .error {
+      margin-top: 1rem;
+      color: red;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Кружка "FastAPI"</h1>
+    <div class="price">$15.00</div>
+    <button onclick="createCheckout()">Купить</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    async function createCheckout() {
+      const errorBox = document.getElementById("error");
+      errorBox.textContent = ""; // очистим ошибки
+
+      try {
+        const res = await fetch("/create-checkout-session", {
+          method: "POST"
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          errorBox.textContent = "Ошибка: " + res.status + " - " + errText;
+          return;
+        }
+
+        const data = await res.json();
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          errorBox.textContent = "❌ Не удалось получить ссылку на оплату";
+        }
+      } catch (err) {
+        errorBox.textContent = "Ошибка подключения: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
