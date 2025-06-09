@@ -1,14 +1,12 @@
-version: '3.9'
+version: "3.9"
 
 services:
   web:
     build: .
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
-      - .:/app  # 👈 Подключаем папку с проектом внутрь контейнера
-    environment:
-      - PYTHONUNBUFFERED=1
+      - .:/app
     restart: always
 
   caddy:
@@ -22,6 +20,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
-  volumes:
-    caddy_data:
-    caddy_config:
+volumes:
+  caddy_data:
+  caddy_config:
