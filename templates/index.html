@@ -1,108 +1,78 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Магазин</title>
+  <meta charset="UTF-8">
+  <title>Каталог</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      font-family: sans-serif;
       margin: 0;
-    }
-
-    .container {
-      background: white;
       padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      width: 300px;
+      background: #f4f4f4;
     }
 
     h1 {
-      margin-bottom: 1rem;
+      text-align: center;
     }
 
-    .price {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 1.5rem;
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .product {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    form {
+      margin-top: 1rem;
     }
 
     button {
-      padding: 10px 20px;
-      font-size: 16px;
       background: #6772e5;
       color: white;
       border: none;
+      padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s;
     }
 
     button:hover {
       background: #5469d4;
     }
 
-    .error {
-      margin-top: 1rem;
-      color: red;
-      font-size: 14px;
+    .top {
+      text-align: center;
+      margin-bottom: 2rem;
     }
+
+    a {
+      text-decoration: none;
+      color: #6772e5;
+    }
+
   </style>
 </head>
 <body>
-<h1>Каталог товаров</h1>
-  {% for product in products %}
-    <form action="/cart/add" method="post">
-      <p><strong>{{ product.name }}</strong> — ${{ product.price_cents / 100 }}</p>
-      <input type="hidden" name="name" value="{{ product.name }}">
-      <input type="hidden" name="price_cents" value="{{ product.price_cents }}">
-      Кол-во: <input type="number" name="quantity" value="1" min="1">
-      <button type="submit">Добавить в корзину</button>
-    </form>
-    <hr>
-  {% endfor %}
-  <p><a href="/cart">🛒 Перейти в корзину</a></p>
 
-  <div class="container">
-    <h1>Кружка "Бубка"</h1>
-    <div class="price">$15.00</div>
-    <button onclick="createCheckout()">Купить</button>
-    <div class="error" id="error"></div>
+  <div class="top">
+    <h1>Каталог товаров</h1>
+    <p><a href="/cart">🛒 Перейти в корзину</a></p>
   </div>
 
-  <script>
-    async function createCheckout() {
-      const errorBox = document.getElementById("error");
-      errorBox.textContent = ""; // очистим ошибки
-
-      try {
-        const res = await fetch("/create-checkout-session", {
-          method: "POST"
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          errorBox.textContent = "Ошибка: " + res.status + " - " + errText;
-          return;
-        }
-
-        const data = await res.json();
-        if (data.checkout_url) {
-          window.location.href = data.checkout_url;
-        } else {
-          errorBox.textContent = "❌ Не удалось получить ссылку на оплату";
-        }
-      } catch (err) {
-        errorBox.textContent = "Ошибка подключения: " + err.message;
-      }
-    }
-  </script>
-</body>
-</html>
+  <div class="products">
+    {% for product in products %}
+      <div class="product">
+        <h3>{{ product.name }}</h3>
+        <p><strong>${{ product.price_cents / 100 }}</strong></p>
+        <form action="/cart/add" method="post">
+          <input type="hidden" name="name" value="{{ product.name }}">
+          <input type="hidden" name="price_cents" value="{{ product.price_cents }}">
+          <input type="number" name="quantity" value="1" min="1
