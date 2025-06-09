@@ -69,8 +69,8 @@ async def create_checkout_session():
                 "quantity": 1,
             }],
             mode="payment",
-            success_url="http://localhost:8000/success",
-            cancel_url="http://localhost:8000/cancel",
+            success_url="https://jacob-python.ru/success",
+            cancel_url="http://jacob-python.ru/cancel",
         )
         return {"checkout_url": session.url}
     except Exception as e:
