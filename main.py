@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, Request, HTTPException
@@ -6,6 +7,7 @@ import os
 from dotenv import load_dotenv
 from database import database, payments  # импорт из database.py
 import datetime
+from pydantic import BaseModel
 from email_utils import send_payment_email
 
 load_dotenv()  # Загружаем переменные из .env
@@ -21,6 +23,35 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
+
+
+books = [
+    {
+        "id": 1,
+        "title": 'War and Peace',
+        "author": "Jacob"
+    }
+]
+
+class NewBook(BaseModel):
+    title: str
+    author: str
+
+@app.post("/books")
+def create_book(book: NewBook):
+    books.append({
+        "id": len(books) + 1,
+        "title": book.title,
+        "author": book.author
+    })
+
+
+@app.get("/books")
+def get_books():
+    return books
+
+
+
 
 @app.post("/create-checkout-session")
 async def create_checkout_session():
@@ -120,3 +151,7 @@ async def get_payments_html(request: Request):
     query = payments.select().order_by(payments.c.created_at.desc())
     result = await database.fetch_all(query)
     return templates.TemplateResponse("payments.html", {"request": request, "payments": result})
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)
