@@ -2,6 +2,7 @@ import uvicorn
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, Request, HTTPException, Form
+from fastapi.responses import RedirectResponse
 import stripe
 import os
 from dotenv import load_dotenv
@@ -34,7 +35,7 @@ async def create_checkout_session():
                 "price_data": {
                     "currency": "usd",
                     "product_data": {
-                        "name": "Coffee Mug",
+                        "name": "Кружка Бубки",
                     },
                     "unit_amount": 1500,  # 15.00 USD
                 },
@@ -126,7 +127,7 @@ async def get_payments_html(request: Request):
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     products = [
-        {"name": "Coffee Mug", "price_cents": 1500},
+        {"name": "Кружка Бубки", "price_cents": 1500},
         {"name": "T-Shirt", "price_cents": 2500},
         {"name": "Sticker Pack", "price_cents": 500},
         {"name": "Water Bottle", "price_cents": 2000},
@@ -166,9 +167,10 @@ def clear_cart():
     return {"message": "Корзина очищена"}
 
 @app.post("/cart/checkout")
-async def checkout():
+async def checkout(request: Request):
     if not cart:
-        raise HTTPException(status_code=400, detail="Корзина пуста")
+        return templates.TemplateResponse("cart.html", {"request": request, "cart": cart, "total": 0, "error": "Корзина пуста"})
+
 
     line_items = [
         {
@@ -190,7 +192,7 @@ async def checkout():
     )
 
     cart.clear()  # очищаем корзину после оформления
-    return {"checkout_url": session.url}
+    return RedirectResponse(session.url, status_code=303)
 
 # ----------------- End -------------------------------
 

@@ -1,7 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
   <title>Корзина</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 500px;
+      margin: 1rem auto;
+    }
+    li {
+      padding: 0.5rem;
+      background: white;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+    }
+    .total {
+      font-weight: bold;
+      text-align: center;
+    }
+    form {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    button {
+      background: #6772e5;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .back-link {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .back-link a {
+      color: #555;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
   <h1>Корзина</h1>
@@ -12,15 +65,21 @@
         <li>{{ item.quantity }} × {{ item.name }} — ${{ (item.price_cents * item.quantity) / 100 }}</li>
       {% endfor %}
     </ul>
-    <p><strong>Итого: ${{ total / 100 }}</strong></p>
+    <p class="total">Итого: ${{ total / 100 }}</p>
 
     <form action="/cart/checkout" method="post">
       <button type="submit">Перейти к оплате</button>
     </form>
   {% else %}
-    <p>Корзина пуста.</p>
+    <p class="error">Корзина пуста.</p>
   {% endif %}
 
-  <p><a href="/">← Назад в магазин</a></p>
+  {% if error %}
+    <div class="error">Ошибка: {{ error }}</div>
+  {% endif %}
+
+  <div class="back-link">
+    <a href=\"/\">← Назад в магазин</a>
+  </div>
 </body>
 </html>
