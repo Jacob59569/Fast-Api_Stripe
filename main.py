@@ -25,34 +25,6 @@ async def shutdown():
     await database.disconnect()
 
 
-books = [
-    {
-        "id": 1,
-        "title": 'War and Peace',
-        "author": "Jacob"
-    }
-]
-
-class NewBook(BaseModel):
-    title: str
-    author: str
-
-@app.post("/books")
-def create_book(book: NewBook):
-    books.append({
-        "id": len(books) + 1,
-        "title": book.title,
-        "author": book.author
-    })
-
-
-@app.get("/books")
-def get_books():
-    return books
-
-
-
-
 @app.post("/create-checkout-session")
 async def create_checkout_session():
     try:
@@ -152,6 +124,57 @@ async def get_payments_html(request: Request):
     result = await database.fetch_all(query)
     return templates.TemplateResponse("payments.html", {"request": request, "payments": result})
 
+# ----------------- Cart -------------------------------
+
+class CartItem(BaseModel):
+    name: str
+    price_cents: int
+    quantity: int
+
+cart = []
+
+@app.post("/cart/add")
+def add_to_cart(item: CartItem):
+    cart.append(item)
+    return {"message": f"{item.quantity}x {item.name} добавлено в корзину"}
+
+@app.get("/cart")
+def view_cart():
+    return {"cart": cart}
+
+@app.delete("/cart/clear")
+def clear_cart():
+    cart.clear()
+    return {"message": "Корзина очищена"}
+
+@app.post("/cart/checkout")
+async def checkout():
+    if not cart:
+        raise HTTPException(status_code=400, detail="Корзина пуста")
+
+    line_items = [
+        {
+            "price_data": {
+                "currency": "usd",
+                "product_data": {"name": item.name},
+                "unit_amount": item.price_cents
+            },
+            "quantity": item.quantity
+        } for item in cart
+    ]
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=line_items,
+        mode="payment",
+        success_url="https://jacob-python.ru/success",
+        cancel_url="https://jacob-python.ru/cancel"
+    )
+
+    cart.clear()  # очищаем корзину после оформления
+    return {"checkout_url": session.url}
+
+# ----------------- End -------------------------------
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
