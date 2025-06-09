@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Form
 import stripe
 import os
 from dotenv import load_dotenv
@@ -85,10 +85,7 @@ async def stripe_webhook(request: Request):
 
 templates = Jinja2Templates(directory="templates")
 
-# Отдаём главную страницу
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+
 
 # Страница успеха
 @app.get("/success", response_class=HTMLResponse)
@@ -124,6 +121,20 @@ async def get_payments_html(request: Request):
     result = await database.fetch_all(query)
     return templates.TemplateResponse("payments.html", {"request": request, "payments": result})
 
+
+# Отдаём главную страницу
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    products = [
+        {"name": "Coffee Mug", "price_cents": 1500},
+        {"name": "T-Shirt", "price_cents": 2500},
+        {"name": "Sticker Pack", "price_cents": 500},
+        {"name": "Water Bottle", "price_cents": 2000},
+        {"name": "Notebook", "price_cents": 1000},
+        {"name": "Hoodie", "price_cents": 4000},
+    ]
+    return templates.TemplateResponse("index.html", {"request": request, "products": products})
+
 # ----------------- Cart -------------------------------
 
 class CartItem(BaseModel):
@@ -133,10 +144,17 @@ class CartItem(BaseModel):
 
 cart = []
 
-@app.post("/cart/add")
-def add_to_cart(item: CartItem):
-    cart.append(item)
-    return {"message": f"{item.quantity}x {item.name} добавлено в корзину"}
+# @app.post("/cart/add")
+# def add_to_cart(item: CartItem):
+#     cart.append(item)
+#     return {"message": f"{item.quantity}x {item.name} добавлено в корзину"}
+
+@app.post("/cart/add", response_class=HTMLResponse)
+def add_to_cart(request: Request, name: str = Form(...), price_cents: int = Form(...), quantity: int = Form(...)):
+    cart.append(CartItem(name=name, price_cents=price_cents, quantity=quantity))
+    total = sum(item.price_cents * item.quantity for item in cart)
+    return templates.TemplateResponse("cart.html", {"request": request, "cart": cart, "total": total})
+
 
 @app.get("/cart")
 def view_cart():
