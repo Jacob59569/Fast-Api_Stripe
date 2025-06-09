@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Корзина</title>
+</head>
+<body>
+  <h1>Корзина</h1>
+
+  {% if cart %}
+    <ul>
+      {% for item in cart %}
+        <li>{{ item.quantity }} × {{ item.name }} — ${{ (item.price_cents * item.quantity) / 100 }}</li>
+      {% endfor %}
+    </ul>
+    <p><strong>Итого: ${{ total / 100 }}</strong></p>
+
+    <form action="/cart/checkout" method="post">
+      <button type="submit">Перейти к оплате</button>
+    </form>
+  {% else %}
+    <p>Корзина пуста.</p>
+  {% endif %}
+
+  <p><a href="/">← Назад в магазин</a></p>
+</body>
+</html>

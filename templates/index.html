@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Купить кружку</title>
+  <title>Магазин</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -57,6 +57,19 @@
   </style>
 </head>
 <body>
+<h1>Каталог товаров</h1>
+  {% for product in products %}
+    <form action="/cart/add" method="post">
+      <p><strong>{{ product.name }}</strong> — ${{ product.price_cents / 100 }}</p>
+      <input type="hidden" name="name" value="{{ product.name }}">
+      <input type="hidden" name="price_cents" value="{{ product.price_cents }}">
+      Кол-во: <input type="number" name="quantity" value="1" min="1">
+      <button type="submit">Добавить в корзину</button>
+    </form>
+    <hr>
+  {% endfor %}
+  <p><a href="/cart">🛒 Перейти в корзину</a></p>
+
   <div class="container">
     <h1>Кружка "Бубка"</h1>
     <div class="price">$15.00</div>
