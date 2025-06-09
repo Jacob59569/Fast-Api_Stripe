@@ -75,4 +75,12 @@
         <form action="/cart/add" method="post">
           <input type="hidden" name="name" value="{{ product.name }}">
           <input type="hidden" name="price_cents" value="{{ product.price_cents }}">
-          <input type="number" name="quantity" value="1" min="1
+          <input type="number" name="quantity" value="1" min="1">
+          <button type="submit">Добавить</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+
+</body>
+</html>
