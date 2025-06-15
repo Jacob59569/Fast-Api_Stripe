@@ -1,16 +1,4 @@
-jacob-python.ru {
+shieldvpn.ru {
     reverse_proxy web:8000
 }
 
-admin.jacob-python.ru {
-    reverse_proxy web:8000
-}
-
-
-test.jacob-python.ru {
-    reverse_proxy web:8000
-}
-
-api.jacob-python.ru {
-    reverse_proxy web:8000
-}

@@ -42,8 +42,8 @@ async def create_checkout_session():
                 "quantity": 1,
             }],
             mode="payment",
-            success_url="https://jacob-python.ru/success",
-            cancel_url="https://jacob-python.ru/cancel",
+            success_url="https://shieldvpn.ru/success",
+            cancel_url="https://shieldvpn.ru/cancel",
         )
         return {"checkout_url": session.url}
     except Exception as e:
@@ -187,8 +187,8 @@ async def checkout(request: Request):
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-        success_url="https://jacob-python.ru/success",
-        cancel_url="https://jacob-python.ru/cancel"
+        success_url="https://shieldvpn.ru/success",
+        cancel_url="https://shieldvpn.ru/cancel"
     )
 
     cart.clear()  # очищаем корзину после оформления
