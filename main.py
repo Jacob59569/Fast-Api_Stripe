@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from database import database, payments  # импорт из database.py
 import datetime
 from pydantic import BaseModel
+from user_agents import parse
 from email_utils import send_payment_email
 
 load_dotenv()  # Загружаем переменные из .env
@@ -126,15 +127,15 @@ async def get_payments_html(request: Request):
 # Отдаём главную страницу
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    products = [
-        {"name": "Кружка Бубки", "price_cents": 1500},
-        {"name": "T-Shirt", "price_cents": 2500},
-        {"name": "Sticker Pack", "price_cents": 500},
-        {"name": "Water Bottle", "price_cents": 2000},
-        {"name": "Notebook", "price_cents": 1000},
-        {"name": "Hoodie", "price_cents": 4000},
-    ]
-    return templates.TemplateResponse("index.html", {"request": request, "products": products})
+    ua_string = request.headers.get("user-agent", "")
+    user_agent = parse(ua_string)
+
+    if user_agent.is_mobile:
+        template_name = "mobile.html"
+    else:
+        template_name = "desktop.html"
+
+    return templates.TemplateResponse(template_name, {"request": request})
 
 # ----------------- Cart -------------------------------
 
